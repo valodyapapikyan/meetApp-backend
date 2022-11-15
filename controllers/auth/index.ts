@@ -5,9 +5,7 @@ export class TaskController {
 
     private logger: APILogger;
 
-    constructor() {
-      
-    }
+    // constructor() {}
 
 
 }

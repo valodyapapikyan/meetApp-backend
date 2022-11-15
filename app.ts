@@ -36,20 +36,16 @@ class App {
 
     private routes(): void {
 
-        this.express.get('/api/tasks', (req, res) => {
+        // this.express.get('/api/tasks', (req, res) => { });
 
-        });
+        // this.express.post('/api/task', (req, res) => { });
 
-        this.express.post('/api/task', (req, res) => {
+        // this.express.put('/api/task', (req, res) => {
+        //     // this.taskController.updateTask(req.body.task).then(data => res.json(data));
+        // });
 
-        });
-
-        this.express.put('/api/task', (req, res) => {
-            // this.taskController.updateTask(req.body.task).then(data => res.json(data));
-        });
-
-        this.express.delete('/api/task/:id', (req, res) => {
-        });
+        // this.express.delete('/api/task/:id', (req, res) => {
+        // });
 
         this.express.get("/", (req, res, next) => {
             res.send("Typescript App works!!");

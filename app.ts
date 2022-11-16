@@ -1,16 +1,20 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import { APILogger } from "./logger/api.logger";
-import { TaskController } from "./controllers/auth";
+import { AuthController } from "./controllers/auth";
 import * as swaggerUi from 'swagger-ui-express';
 import * as fs from 'fs';
+
+import dbInit from './database/init'
+
 import 'dotenv/config'
 
 class App {
 
     public express: express.Application;
     public logger: APILogger;
-    public taskController: TaskController;
+    public taskController: AuthController;
+    public db : any;
 
     /* Swagger files start */
     private swaggerFile: any = (process.cwd()+"/swagger/swagger.json");
@@ -24,8 +28,10 @@ class App {
         this.express = express();
         this.middleware();
         this.routes();
+
         this.logger = new APILogger();
-        this.taskController = new TaskController();
+        dbInit();
+
     }
 
     // Configure Express middleware.
@@ -36,20 +42,15 @@ class App {
 
     private routes(): void {
 
-        // this.express.get('/api/tasks', (req, res) => { });
-
-        // this.express.post('/api/task', (req, res) => { });
-
-        // this.express.put('/api/task', (req, res) => {
-        //     // this.taskController.updateTask(req.body.task).then(data => res.json(data));
-        // });
-
-        // this.express.delete('/api/task/:id', (req, res) => {
-        // });
-
         this.express.get("/", (req, res, next) => {
             res.send("Typescript App works!!");
         });
+
+        this.express.get("/login", (req, res, next) => {
+             AuthController.login(req,res)
+            res.send("ok");
+        });
+
 
         // swagger docs
         this.express.use('/api/docs', swaggerUi.serve,

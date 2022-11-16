@@ -1,11 +1,15 @@
 import { APILogger } from '../../logger/api.logger';
 // import { TaskService } from '../service/task.service';
 
-export class TaskController {
+export class AuthController {
 
     private logger: APILogger;
 
-    // constructor() {}
+    constructor() { }
 
+    static async login (req, res) {
+        console.log(req);
+
+    }
 
 }

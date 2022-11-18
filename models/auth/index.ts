@@ -1,38 +1,37 @@
-import { DataTypes, Model, Optional } from 'sequelize'
-import sequelizeConnection from '../../database/config';
+import { DataTypes, Model, BuildOptions } from 'sequelize';
 
-interface IAuthModel {
-    id: number;
-    name: string;
+import sequelize from '../../database/config';
+
+interface UserModel extends Model {
+  readonly id: number;
+  token?: string
 }
 
-export interface TagInput extends Optional<IAuthModel,null> {}
+// Need to declare the static model so `findOne` etc. use correct types.
+type UserStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): UserModel;
+};
 
-export interface TagOutput extends Required<IAuthModel> {}
+export const User = <UserStatic>sequelize.define('users', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  token: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+});
 
-class Auth extends Model<IAuthModel, TagInput> implements IAuthModel {
-    public id!: number;
-    public name!: string;
 
-    // timestamps!
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
-    public readonly deletedAt!: Date;
-}
 
-Auth.init({
-    id: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-}, {
-  sequelize: sequelizeConnection,
-  paranoid: true
-})
-
-export default Auth

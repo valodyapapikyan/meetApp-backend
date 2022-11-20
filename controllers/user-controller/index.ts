@@ -6,9 +6,11 @@ const jwt = require('jsonwebtoken');
 import {
   SuccessHttpResponse,
   ErrorHttpResponse,
+  HTTP_STATUS,
 } from '../../utils/http-response/index';
 
 import { dataBase } from '../../models/index';
+import moment from 'moment';
 
 class UserController {
   constructor() {}
@@ -17,29 +19,32 @@ class UserController {
     try {
       const { email, password } = req.body;
 
-      const data = {
-        email,
-        password: await bcrypt.hash(password, 10),
-      };
-
-      const user = await dataBase.User.create(data);
+      const user = await dataBase.User.findOne({
+        where: { email: email.toLowerCase().trim() },
+        raw: true,
+      });
 
       if (user) {
-        const token = jwt.sign(
-          { userid: user.id, email },
-          process.env.SECRET_KEY!,
-          {
-            expiresIn: '2h',
-          }
-        );
-
-        user.token = token;
-        return res.send(new SuccessHttpResponse({ user: { email } }));
-      } else {
-        return res.send(new ErrorHttpResponse([`Details are not correct`]));
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          statusCode: HTTP_STATUS.BAD_REQUEST,
+          ...new ErrorHttpResponse([`user_already_exist`]),
+        });
       }
+
+      const userData = await dataBase.User.create({
+        email: email.toLowerCase().trim(),
+        password: await bcrypt.hash(password, 10),
+      });
+
+      const { id } = userData.get({ plain: true });
+
+      res.status(HTTP_STATUS.CREATED).json(
+        new SuccessHttpResponse({
+          id,
+        })
+      );
     } catch (error) {
-      return res.send(new ErrorHttpResponse([`Details are not correct`]));
+      res.status(HTTP_STATUS.BAD_REQUEST);
     }
   }
 

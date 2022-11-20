@@ -4,7 +4,6 @@ import sequelize from '../../database/config';
 
 interface UserModel extends Model {
   readonly id: number;
-  token?: string
 }
 
 // Need to declare the static model so `findOne` etc. use correct types.
@@ -17,21 +16,14 @@ export const User = <UserStatic>sequelize.define('users', {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
-    primaryKey: true
+    primaryKey: true,
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  token: {
-    type: DataTypes.STRING,
-    allowNull: true
+    allowNull: false,
   },
 });
-
-
-

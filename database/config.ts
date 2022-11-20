@@ -1,16 +1,18 @@
-import {  Sequelize } from 'sequelize'
+import { Sequelize } from 'sequelize';
 import { DB_CONFIG } from '../configs';
-import { Model } from 'sequelize-typescript';
 
-require('dotenv').config()
+require('dotenv').config();
 
-
-
-export const sequelizeConnection: Sequelize = new Sequelize( DB_CONFIG.db.database,  DB_CONFIG.db.username, null, {
-  dialect: DB_CONFIG.db.dialect,
-  logging: false,
-  port: 5432,
-});
+export const sequelizeConnection: Sequelize = new Sequelize(
+  DB_CONFIG.db.database,
+  DB_CONFIG.db.username,
+  null,
+  {
+    dialect: DB_CONFIG.db.dialect,
+    logging: false,
+    port: 5432,
+  }
+);
 
 (async () => {
   try {
@@ -21,4 +23,4 @@ export const sequelizeConnection: Sequelize = new Sequelize( DB_CONFIG.db.databa
   }
 })();
 
-export default sequelizeConnection
+export default sequelizeConnection;

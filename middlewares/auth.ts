@@ -47,7 +47,7 @@ export const authorize = (...roles: string[]) => {
   return (req: any, res: any, next: any) => {
     if (!roles.includes(req.user.role)) {
       return next();
-      //ETE ROLE BASED AUTHORIZATION UZEN , UREMN VOROSH CHAPOV PATRAST E :D
+      //role based 
       // protect, authorize('publisher'),deleteBootcamp)
     }
     next();

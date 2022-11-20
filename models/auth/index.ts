@@ -4,6 +4,8 @@ import sequelize from '../../database/config';
 
 interface UserModel extends Model {
   readonly id: number;
+  password: string,
+  email:string
 }
 
 // Need to declare the static model so `findOne` etc. use correct types.

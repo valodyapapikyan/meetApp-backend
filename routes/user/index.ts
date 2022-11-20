@@ -9,7 +9,7 @@ export class UserRoutes extends RouteConfig {
   }
 
   configureRoutes(): Application {
-    this.app.route('/signin').get([UserController.signIn]);
+    this.app.route('/signIn').post([UserController.signIn]);
     this.app.route('/signUp').post([UserController.signUp]);
 
     //VOR ROUTE -@ UZENQ PROTECT ANENQ

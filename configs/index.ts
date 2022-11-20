@@ -14,3 +14,6 @@ export const DB_CONFIG = {
     sync: Boolean(process.env.NODE_ENV === 'development'),
   },
 };
+
+
+export const COAST_FACTOR = 10;

@@ -1,15 +1,18 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { APILogger } from './logger/api.logger';
-import UserController from './controllers/user-controller';
-import * as swaggerUi from 'swagger-ui-express';
+
+
 import * as fs from 'fs';
+const cors = require('cors');
+
 
 import dbInit from './database/init';
 
 import 'dotenv/config';
 import { RouteConfig } from './routes/helpers/RouteConfig';
 import { UserRoutes } from './routes/user';
+import { Oauth2Routes } from './routes/oaut2';
 import { routeMapper } from './utils';
 
 class App {
@@ -43,7 +46,7 @@ class App {
   }
 
   private init(): void {
-    routeMapper([UserRoutes], this.express).forEach((route) =>
+    routeMapper([UserRoutes,Oauth2Routes], this.express).forEach((route) =>
       this.routes.push(route)
     );
   }
@@ -51,7 +54,11 @@ class App {
   private middleware(): void {
     this.express.use(bodyParser.json());
     this.express.use(bodyParser.urlencoded({ extended: false }));
+    this.express.use(cors())
+
   }
 }
 
 export default new App().express;
+
+

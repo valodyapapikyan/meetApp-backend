@@ -1,15 +1,26 @@
 import { Response, Request, NextFunction } from 'express';
 import { Oaut2Service } from '../../services/oauth2/index';
-import { HTTP_STATUS, SuccessHttpResponse } from '../../utils/http-response';
+import {
+  ErrorHttpResponse,
+  HTTP_STATUS,
+  SuccessHttpResponse,
+} from '../../utils/http-response';
+import { Op } from 'sequelize';
+
+import { dataBase } from '../../models/index';
+import { IProfile } from '../../interfaces';
+import { getEmail } from '../../utils';
 
 class Oauth2Controller {
-  constructor() {}
 
-  async getGoogleAuthorizeUrl(req: Request, res: Response, next: NextFunction) {
+  async getLinkedinAuthorizeUrl(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const { redirectUrl } = req.query;
-
-      const URL = await Oaut2Service.getGoogleAuthorizeUrl(redirectUrl);
+      const URL = Oaut2Service.getLinkedinAuthorizeUrl(redirectUrl);
 
       if (URL) {
         res.status(HTTP_STATUS.CREATED).json(
@@ -18,43 +29,79 @@ class Oauth2Controller {
           })
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
     }
-  };
+  }
 
-  async authorizeGoogle (req: Request, res: Response, next: NextFunction) {
+  async authorizeLinkedin(
+    request: any,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
-      const { code, redirectUrl } = req.body;
-      const social = {};
-      const socialUser = {};
+      const { code, redirectUrl } = request.body;
+      const social: Partial<IProfile> = {};
+      const socialUser: IProfile = {} as IProfile;
 
-      const result = await Oaut2Service.authorizeGoogle(code, redirectUrl);
-      const profile = await Oaut2Service.getGoogleProfile(result, redirectUrl);
-      console.log(result);
+      const result = await Oaut2Service.authorizeLinkedinService(
+        code,
+        redirectUrl
+      );
+
+
+      const data: any = await Oaut2Service.getLinkedinProfile(
+        result.access_token
+      );
+
+      const profile = {
+        ...JSON.parse(data.profile),
+        ...JSON.parse(data.email),
+      };
+
+      social.linkedinId = profile.id;
+
+      socialUser.email = getEmail(profile);
+      socialUser.firstName = profile.firstName;
+      socialUser.lastName = profile.lastName;
+
+
+      const user = await dataBase.User.findOne({
+        where: {
+          [Op.or]: [
+            { linkedinId: social.linkedinId },
+            { email: socialUser.email },
+          ],
+        },
+        raw: true,
+      });
+
       
 
-      // social.googleId = profile.data.resourceName;
-      // socialUser.email = profile.data.emailAddresses[0].value.toLowerCase();
-      // socialUser.firstName = profile.data.names[0].givenName;
-      // socialUser.lastName = profile.data.names[0].familyName;
+      let accessToken;
 
-      // const user = await db.User.findOne({
-      //     where: { [Op.or]: [ { googleId: social.googleId }, { email: socialUser.email } ] },
-      //     raw: true
-      // });
+      if (user) {
+        accessToken = await Oaut2Service.signInUserWithSocial(user, {
+          linkedinId: social.linkedinId,
+        });
+      }
 
-      let token = null;
+      if (!user) {
+        accessToken = await Oaut2Service.signUpUserWithSocial(profile, social);
+      }
 
-      // if (user) token = await HelperService.signInUserWithSocial(user, { googleId: social.googleId });
-      // if (!user) token = await HelperService.signUpUserWithSocial(socialUser, social);
-
-      res.json({ token:'exaca' });
-  } catch (err) {
-      console.log(err);
-      res.status(err.statusCode || 400).json({ message: err.message || err });
-  }
+      response.status(HTTP_STATUS.CREATED).json(
+        new SuccessHttpResponse({
+          accessToken,
+        })
+      );
+    } catch (err) {
+      response.status(HTTP_STATUS.BAD_REQUEST).json({
+        statusCode: HTTP_STATUS.BAD_REQUEST,
+        ...new ErrorHttpResponse([`bad_requset`]),
+      });
+    }
   }
 }
 
-export default  new Oauth2Controller();
+export default new Oauth2Controller();

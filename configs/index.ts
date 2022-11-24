@@ -13,7 +13,19 @@ export const DB_CONFIG = {
     },
     sync: Boolean(process.env.NODE_ENV === 'development'),
   },
-};
+} ;
 
+export const SOCIAL_PROVIDERS_CREDENTIALS = {
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    apiKey: '',
+  },
+  linkedin: {
+    clientId: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+    apiKey: '',
+  },
+};
 
 export const COAST_FACTOR = 10;

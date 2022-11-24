@@ -4,9 +4,9 @@ import { DB_CONFIG } from '../configs';
 require('dotenv').config();
 
 export const sequelizeConnection: Sequelize = new Sequelize(
-  DB_CONFIG.db.database,
-  DB_CONFIG.db.username,
-  null,
+  DB_CONFIG.db.database as string,
+  DB_CONFIG.db.username as string,
+  undefined,
   {
     dialect: DB_CONFIG.db.dialect,
     logging: false,

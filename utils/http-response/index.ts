@@ -14,7 +14,7 @@ export class HttpResponse<T> {
   constructor(
     public status: RESPONSE_STATUS,
     public data: T,
-    public errorMessages: Array<string>,
+    public errorMessages: Array<string> | null,
     public additionalInfo?: any
   ) {}
 }

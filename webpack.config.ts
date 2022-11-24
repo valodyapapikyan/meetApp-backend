@@ -1,13 +1,7 @@
-const path = require('path');
-const { IgnorePlugin } = require('webpack');
-
+import path from 'path';
 
 module.exports = {
   entry: './index.ts',
-  // plugins: [
-  //   new IgnorePlugin(/^pg-native$/)
-
-	// ],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'api.bundle.js'

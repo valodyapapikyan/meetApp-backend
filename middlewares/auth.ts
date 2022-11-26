@@ -17,7 +17,6 @@ export const protect = asyncHandler(async (req: any, res: any, next: any) => {
     token = req.headers.token;
   }
 
-  // ETE TOKEN CHKA DUS  GETENQ TALIS 401 Gohar jan :d
   if (!token) {
     return next(
       res.status(HTTP_STATUS.ANAUTHORIZED).json({
@@ -30,15 +29,15 @@ export const protect = asyncHandler(async (req: any, res: any, next: any) => {
   try {
     // Verify token
     const decoded: any = jwt.verify(token, process.env.SECRET_KEY);
-
-    const data: any = await User.findOne({ where: { id: decoded.id } });
+    const data: any = await User.findOne({ where: { linkedinId: decoded.id } });
     req.user = data.dataValues;
     next();
   } catch (err) {
     return next(
-      new ErrorHttpResponse([
-        `ES ROUTE IN HASANELI CHES  @nger jan`,
-      ])
+      res.status(HTTP_STATUS.ANAUTHORIZED).json({
+        statusCode: HTTP_STATUS.ANAUTHORIZED,
+        ...new ErrorHttpResponse([`anuthorized_invalid_token`]),
+      })
     );
   }
 });
@@ -47,7 +46,7 @@ export const authorize = (...roles: string[]) => {
   return (req: any, res: any, next: any) => {
     if (!roles.includes(req.user.role)) {
       return next();
-      //role based 
+      //role based
       // protect, authorize('publisher'),deleteBootcamp)
     }
     next();

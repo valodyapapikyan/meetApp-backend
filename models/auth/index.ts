@@ -2,11 +2,7 @@ import { DataTypes, Model, BuildOptions } from 'sequelize';
 
 import sequelize from '../../database/config';
 
-interface UserModel extends Model {
-  readonly id: number;
-  password: string,
-  email:string
-}
+interface UserModel extends Model {}
 
 // Need to declare the static model so `findOne` etc. use correct types.
 type UserStatic = typeof Model & {
@@ -14,13 +10,7 @@ type UserStatic = typeof Model & {
 };
 
 export const User = <UserStatic>sequelize.define('users', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-  password: {
+  linkedinId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -28,4 +18,28 @@ export const User = <UserStatic>sequelize.define('users', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  verified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  lastName: {
+    type: DataTypes.STRING,
+    set(val: string) {
+      this.setDataValue('lastName', val ? val.trim().toUpperCase() : null);
+    },
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    set(val: string) {
+      this.setDataValue('firstName', val ? val.trim().toUpperCase() : null);
+    },
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  profilePicture: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
 });

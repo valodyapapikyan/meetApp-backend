@@ -1,49 +1,32 @@
-import { OAuth2Client } from 'google-auth-library';
+import { v4 as uuidv4 } from 'uuid';
+import rp from 'request-promise';
+import moment from 'moment';
+import bcrypt from 'bcrypt';
+import path from 'path';
 
-const config = {
-  google: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    apiKey: '',
-  },
-};
+import { dataBase } from '../../models/index';
+import {
+  getAccessTokenConfigs,
+  getEmail,
+  getLinkedinAuthorizeUrl,
+  setEmailOptions,
+  setLinkedinAuthorizationHeaders,
+} from '../../utils';
+
+import { JwtSerice } from '../jwt-service';
+import { COAST_FACTOR } from '../../configs';
 
 export class Oaut2Service {
-  constructor() {}
-
-  static getGoogleAuthorizeUrl(redirectUrl: any) {
-    return new Promise((resolve) => {
-      const oAuth2Client = new OAuth2Client(
-        config.google.clientId,
-        config.google.clientId,
-        redirectUrl
-      );
-
-      const authorizeUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: [
-          'https://www.googleapis.com/auth/userinfo.profile',
-          'https://www.googleapis.com/auth/userinfo.email',
-        ],
-        prompt: 'consent',
-      });
-
-      resolve(authorizeUrl);
-    });
+  static getLinkedinAuthorizeUrl(redirectUrl) {
+    return getLinkedinAuthorizeUrl(redirectUrl);
   }
 
-  static authorizeGoogle(code: string, redirectUrl: any) {
-    return new Promise((resolve, reject) => {
-      const oAuth2Client = new OAuth2Client(
-        config.google.clientId,
-        config.google.clientSecret,
-        redirectUrl
-      );
-
-      oAuth2Client
-        .getToken(code)
+  static authorizeLinkedinService(code, redirectUrl) {
+    return new Promise<Promise<{ access_token: string }>>((resolve, reject) => {
+      rp(getAccessTokenConfigs(code, redirectUrl))
         .then((result) => {
-          resolve(result);
+          const data = JSON.parse(result);
+          resolve(data);
         })
         .catch((err) => {
           reject(err);
@@ -51,25 +34,74 @@ export class Oaut2Service {
     });
   }
 
-  static async getGoogleProfile(result, redirectUrl) {
+  private static async getProfile(accessToken: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      const oAuth2Client = new OAuth2Client(
-        config.google.clientId,
-        config.google.clientSecret,
-        redirectUrl
-      );
-      oAuth2Client.setCredentials(result.tokens);
-
-      const url =
-        'https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses';
-      oAuth2Client
-        .request({ url })
-        .then((profile) => {
-          resolve(profile);
-        })
-        .catch((err) => {
-          reject(err);
-        });
+      return rp(setLinkedinAuthorizationHeaders(accessToken))
+        .then((result) => resolve(result))
+        .catch((error) => reject(error));
     });
+  }
+
+  private static async getEmail(accessToken: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      return rp(setEmailOptions(accessToken))
+        .then((result) => resolve(result))
+        .catch((error) => reject(error));
+    });
+  }
+
+  static async collectProfile(accessToken: string) {
+    try {
+      const [profile, email] = await Promise.all<Promise<[any, any]>>([
+        this.getProfile(accessToken),
+        this.getEmail(accessToken),
+      ]);
+
+      return { profile, email };
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  static getLinkedinProfile(accessToken) {
+    return this.collectProfile(accessToken);
+  }
+
+  static async signInUserWithSocial(user, social) {
+    console.log(user);
+    
+    await dataBase.User.update(social, {
+      where: { linkedinId: user.linkedinId },
+    });
+    const token = await JwtSerice.signToken({ id: user.id }, process.env.SECRET_KEY, '24');
+    return Promise.resolve(token);
+  }
+
+  static async signUpUserWithSocial(profile, social) {
+    const password = uuidv4();
+
+    const hash = await await bcrypt.hash(password, COAST_FACTOR);
+
+    const { localizedFirstName, localizedLastName, profilePicture } = profile;
+
+    const userData = await dataBase.User.create({
+      email: getEmail(profile),
+      password: hash,
+      firstName: localizedFirstName,
+      lastName: localizedLastName,
+      profilePicture: profilePicture?.displayImage || '',
+      verified: true,
+      ...social,
+      createdAt: moment.utc().valueOf(),
+    });
+
+    const user = userData.get({ plain: true });
+
+    const token = await await JwtSerice.signToken(
+      { id: user.id },
+      process.env.SECRET_KEY,
+      '24'
+    );
+    return Promise.resolve(token);
   }
 }

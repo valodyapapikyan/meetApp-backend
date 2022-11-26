@@ -1,7 +1,6 @@
 import { Response, NextFunction } from 'express';
-const path = require('path');
-
-const bcrypt = require('bcrypt');
+import path from 'path';
+import bcrypt from 'bcrypt'
 
 import {
   SuccessHttpResponse,
@@ -84,14 +83,11 @@ class UserController {
           });
         }
 
-        const certPath = path.join(
-          `${__dirname}/../../certs/user-token/private.pem`
-        );
-
+   
         try {
           const token = await JwtSerice.signToken(
             { id: user.id },
-            certPath,
+            process.env.SECRET_KEY,
             '24'
           );
 

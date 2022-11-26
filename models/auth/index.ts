@@ -43,3 +43,4 @@ export const User = <UserStatic>sequelize.define('users', {
     allowNull: true
   }
 });
+

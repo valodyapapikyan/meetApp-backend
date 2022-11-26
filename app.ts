@@ -5,11 +5,16 @@ import * as fs from 'fs';
 import dbInit from './database/init';
 
 import 'dotenv/config';
+
 import { RouteConfig } from './routes/helpers/RouteConfig';
 import { Oauth2Routes } from './routes/oaut2';
+import {EventsRoute} from './routes/events';
+
 import { routeMapper } from './utils';
 
-const cors = require('cors');
+const cors = require("cors");
+
+
 class App {
   public express: express.Application;
   public logger: APILogger;
@@ -41,7 +46,8 @@ class App {
   }
 
   private init(): void {
-    routeMapper([Oauth2Routes], this.express).forEach((route) =>
+
+    routeMapper([Oauth2Routes,EventsRoute], this.express).forEach((route) =>
       this.routes.push(route)
     );
   }

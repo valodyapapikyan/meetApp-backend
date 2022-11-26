@@ -1,21 +1,19 @@
 import * as bodyParser from 'body-parser';
 import express from 'express';
 import { APILogger } from './logger/api.logger';
-
-
 import * as fs from 'fs';
 import dbInit from './database/init';
 
 import 'dotenv/config';
 
 import { RouteConfig } from './routes/helpers/RouteConfig';
-import { UserRoutes } from './routes/user';
 import { Oauth2Routes } from './routes/oaut2';
 import {EventsRoute} from './routes/events';
 
 import { routeMapper } from './utils';
 
 const cors = require("cors");
+
 
 class App {
   public express: express.Application;
@@ -48,6 +46,7 @@ class App {
   }
 
   private init(): void {
+
     routeMapper([Oauth2Routes,EventsRoute], this.express).forEach((route) =>
       this.routes.push(route)
     );

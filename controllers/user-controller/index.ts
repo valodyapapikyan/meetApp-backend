@@ -13,11 +13,10 @@ import { COAST_FACTOR } from '../../configs';
 import { JwtSerice } from '../../services/jwt-service';
 
 class UserController {
-  constructor() {}
 
-  async signUp(req: any, res: Response, next: NextFunction) {
+  async signUp(request: any, response: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
+      const { email, password } = request.body;
 
       const user = await dataBase.User.findOne({
         where: { email: email.toLowerCase().trim() },
@@ -25,7 +24,7 @@ class UserController {
       });
 
       if (user) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
+        response.status(HTTP_STATUS.BAD_REQUEST).json({
           statusCode: HTTP_STATUS.BAD_REQUEST,
           ...new ErrorHttpResponse([`user_already_exist`]),
         });
@@ -38,22 +37,22 @@ class UserController {
 
       const { id } = userData.get({ plain: true });
 
-      res.status(HTTP_STATUS.CREATED).json(
+      response.status(HTTP_STATUS.CREATED).json(
         new SuccessHttpResponse({
           id,
         })
       );
     } catch (error) {
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      response.status(HTTP_STATUS.BAD_REQUEST);
     }
   }
 
-  async signIn(req: any, res: Response, next: NextFunction) {
+  async signIn(request: any, response: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
+      const { email, password } = request.body;
 
       if (!email || !password) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
+        response.status(HTTP_STATUS.BAD_REQUEST).json({
           statusCode: HTTP_STATUS.BAD_REQUEST,
           ...new ErrorHttpResponse([`email_password_required`]),
         });
@@ -65,7 +64,7 @@ class UserController {
       });
 
       if (!user) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
+        response.status(HTTP_STATUS.BAD_REQUEST).json({
           statusCode: HTTP_STATUS.BAD_REQUEST,
           ...new ErrorHttpResponse([`incorect_email_password`]),
         });
@@ -77,7 +76,7 @@ class UserController {
         const result = await bcrypt.compare(password, user.password);
 
         if (!result) {
-          res.status(HTTP_STATUS.ANAUTHORIZED).json({
+          response.status(HTTP_STATUS.ANAUTHORIZED).json({
             statusCode: HTTP_STATUS.ANAUTHORIZED,
             ...new ErrorHttpResponse([`email_password_incorect`]),
           });
@@ -92,14 +91,14 @@ class UserController {
           );
 
           if (token) {
-            res.status(HTTP_STATUS.CREATED).json(
+            response.status(HTTP_STATUS.CREATED).json(
               new SuccessHttpResponse({
                 token,
               })
             );
           }
         } catch (error) {
-          res.status(HTTP_STATUS.ANAUTHORIZED).json({
+          response.status(HTTP_STATUS.ANAUTHORIZED).json({
             statusCode: HTTP_STATUS.ANAUTHORIZED,
             ...new ErrorHttpResponse([`anaouthorized`]),
           });
@@ -108,7 +107,7 @@ class UserController {
     } catch (error) {
       console.log(error);
 
-      res.status(HTTP_STATUS.BAD_REQUEST);
+      response.status(HTTP_STATUS.BAD_REQUEST);
     }
   }
 }

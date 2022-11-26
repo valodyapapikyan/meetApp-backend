@@ -4,3 +4,4 @@ export  interface IProfile  {
   lastName:string,
   linkedinId: string
 }
+

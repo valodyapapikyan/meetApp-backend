@@ -78,33 +78,6 @@ class Oauth2Controller {
       let accessToken;
 
 
-      const data: any = await Oaut2Service.getLinkedinProfile(
-        result.access_token
-      );
-
-      const profile = {
-        ...JSON.parse(data.profile),
-        ...JSON.parse(data.email),
-      };
-
-      social.linkedinId = profile.id;
-
-      socialUser.email = getEmail(profile);
-      socialUser.firstName = profile.firstName;
-      socialUser.lastName = profile.lastName;
-
-
-      const user = await dataBase.User.findOne({
-        where: {
-          [Op.or]: [
-            { linkedinId: social.linkedinId },
-            { email: socialUser.email },
-          ],
-        },
-        raw: true,
-      });
-
-
       if (user) {
         accessToken = await Oaut2Service.signInUserWithSocial(user, {
           linkedinId: social.linkedinId,
@@ -121,9 +94,6 @@ class Oauth2Controller {
         })
       );
     } catch (err) {
-
-      console.log(err);
-      
       response.status(HTTP_STATUS.BAD_REQUEST).json({
         statusCode: HTTP_STATUS.BAD_REQUEST,
         ...new ErrorHttpResponse([`bad_requset_linkedin_autorize`]),

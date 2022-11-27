@@ -3,6 +3,8 @@ export enum HTTP_STATUS {
   CREATED = 201,
   ANAUTHORIZED = 401,
   BAD_REQUEST = 400,
+  NOT_FOUND = 404,
+
 } //todo move to enums
 
 export enum RESPONSE_STATUS {

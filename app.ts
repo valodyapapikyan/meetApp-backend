@@ -8,12 +8,11 @@ import 'dotenv/config';
 
 import { RouteConfig } from './routes/helpers/RouteConfig';
 import { Oauth2Routes } from './routes/oaut2';
-import {EventsRoute} from './routes/events';
+import { EventsRoute } from './routes/events';
 
 import { routeMapper } from './utils';
 
-const cors = require("cors");
-
+const cors = require('cors');
 
 class App {
   public express: express.Application;
@@ -46,20 +45,16 @@ class App {
   }
 
   private init(): void {
-
-    routeMapper([Oauth2Routes,EventsRoute], this.express).forEach((route) =>
+    routeMapper([Oauth2Routes, EventsRoute], this.express).forEach((route) =>
       this.routes.push(route)
     );
   }
 
   private middleware(): void {
     this.express.use(bodyParser.json());
-    this.express.use(bodyParser.urlencoded({ extended: false }));
-    this.express.use(cors())
-
+    this.express.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+    this.express.use(cors());
   }
 }
 
 export default new App().express;
-
-

@@ -15,12 +15,12 @@ export const Events = <EvantStatic>sequelize.define('events', {
     allowNull: false,
   },
   dateTime: {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: false
+    defaultValue: false,
   },
   endDate : {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
     allowNull: false,
     defaultValue: false
   },
@@ -39,6 +39,11 @@ export const Events = <EvantStatic>sequelize.define('events', {
   gudelinnes: {
     type: DataTypes.STRING,
     defaultValue: false,
+    allowNull: true
+  },
+  eventID: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV1,
     allowNull: true
   },
 });

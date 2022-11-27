@@ -17,7 +17,6 @@ export const protect = asyncHandler(async (req: any, res: any, next: any) => {
     token = req.headers.token;
   }
 
-  
   if (!token) {
     return next(
       res.status(HTTP_STATUS.ANAUTHORIZED).json({
@@ -30,7 +29,7 @@ export const protect = asyncHandler(async (req: any, res: any, next: any) => {
   try {
     // Verify token
     const decoded: any = jwt.verify(token, process.env.SECRET_KEY);
-    const data: any = await User.findOne({ where: { linkedinId: decoded.id } });
+    const data: any = await User.findOne({ where: { userID: decoded.userID } });
     req.user = data.dataValues;
     next();
   } catch (err) {

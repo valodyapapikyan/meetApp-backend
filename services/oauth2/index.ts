@@ -75,33 +75,30 @@ export class Oaut2Service {
     });
 
     return Promise.resolve(
-      await JwtSerice.signToken({ id: user.linkedinId }, process.env.SECRET_KEY, '24')
+      await JwtSerice.signToken({ id: user.userID }, process.env.SECRET_KEY, '24')
     );
   }
 
-  static async signUpUserWithSocial(profile, social) {
-    const password = uuidv4();
-
-    const hash = await bcrypt.hash(password, COAST_FACTOR);
+  static async signUpUserWithSocial(profile, social, provider?) {
 
     const { localizedFirstName, localizedLastName, profilePicture } = profile;
 
     const userData = await dataBase.User.create({
       email: getEmail(profile),
-      password: hash,
       firstName: localizedFirstName,
       lastName: localizedLastName,
       profilePicture: profilePicture?.displayImage || '',
       verified: true,
+      provider,
       ...social,
       createdAt: moment.utc().valueOf(),
     });
 
+
     const user = userData.get({ plain: true });
 
-
     return Promise.resolve(
-      await JwtSerice.signToken({ id: user.linkedinId }, process.env.SECRET_KEY, '24')
+      await JwtSerice.signToken({ userID: user.userID }, process.env.SECRET_KEY, '24')
     );
   }
 }

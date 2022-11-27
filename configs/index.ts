@@ -29,3 +29,4 @@ export const SOCIAL_PROVIDERS_CREDENTIALS = {
 };
 
 export const COAST_FACTOR = 10;
+export const providers = {LINKEDIN: 'linkedin', GOOGLE: 'google', GITHUB: 'github'}

@@ -46,4 +46,9 @@ export const Events = <EvantStatic>sequelize.define('events', {
     defaultValue: DataTypes.UUIDV1,
     allowNull: true
   },
+  creatorID : {
+    type: DataTypes.UUID,
+    defaultValue: null,
+    allowNull: false,
+  }
 });

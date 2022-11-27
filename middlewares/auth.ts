@@ -1,53 +1,54 @@
 import jwt from 'jsonwebtoken';
-import asyncHandler from './asyncHandler';
+import asyncHandler from '../helpers/async-handler';
 
-import { User } from '../models/auth';
-import { ErrorHttpResponse, HTTP_STATUS } from '../utils/http-response';
+import { User } from '../models/user-model';
+import { CreateHttpError } from '../helpers/http-response';
+import { getAuthorizationToken } from '../helpers/get-token';
+import { HTTP_STATUS } from '../enums';
+import { getStatusCode } from '../helpers/utils';
+import { NextFunction } from 'express';
 
-// Protect routes
-export const protect = asyncHandler(async (req: any, res: any, next: any) => {
-  let token: string;
+interface CustomRequest extends Request {
+  user?: any;
+}
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    token = req.headers.authorization.split(' ')[1];
-  } else if (req.headers.token) {
-    token = req.headers.token;
+interface CustomResponse extends Response {
+  status: any;
+}
+
+export const protect = asyncHandler(
+  async (
+    request: CustomRequest,
+    response: CustomResponse,
+    next: NextFunction
+  ) => {
+    let token: string = getAuthorizationToken(request);
+
+    if (!token) {
+      new CreateHttpError(HTTP_STATUS.ANAUTHORIZED, ['anuthorized']);
+    }
+
+    try {
+      const decoded: any = jwt.verify(token, process.env.SECRET_KEY);
+
+      const user: any = await User.findOne({
+        where: { userID: decoded.id },
+      });
+
+      request.user = user.dataValues;
+      next();
+    } catch (error: any) {
+      response.status(getStatusCode(error)).json(error);
+    }
   }
-
-  if (!token) {
-    return next(
-      res.status(HTTP_STATUS.ANAUTHORIZED).json({
-        statusCode: HTTP_STATUS.ANAUTHORIZED,
-        ...new ErrorHttpResponse([`anuthorized`]),
-      })
-    );
-  }
-
-  try {
-    // Verify token
-    const decoded: any = jwt.verify(token, process.env.SECRET_KEY);
-    const data: any = await User.findOne({ where: { userID: decoded.userID } });
-    req.user = data.dataValues;
-    next();
-  } catch (err) {
-    return next(
-      res.status(HTTP_STATUS.ANAUTHORIZED).json({
-        statusCode: HTTP_STATUS.ANAUTHORIZED,
-        ...new ErrorHttpResponse([`anuthorized_invalid_token`]),
-      })
-    );
-  }
-});
+);
 
 export const authorize = (...roles: string[]) => {
   return (req: any, res: any, next: any) => {
     if (!roles.includes(req.user.role)) {
       return next();
-      //role based
-      // protect, authorize('publisher'),deleteBootcamp)
+      //role based authorisation
+      // protect, authorize('some ro'),'/events/delete/:id')
     }
     next();
   };

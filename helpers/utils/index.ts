@@ -1,5 +1,6 @@
 import * as express from 'express';
-import { SOCIAL_PROVIDERS_CREDENTIALS } from '../configs';
+import { SOCIAL_PROVIDERS_CREDENTIALS } from '../../configs';
+import { HTTP_STATUS } from '../../enums/index';
 
 export const routeMapper = <T extends abstract new (...args: any) => any>(
   routes: ConstructorParameters<T>[],
@@ -59,3 +60,5 @@ export const getEmail = (target: object) => {
   return target['elements'][0]['handle~'].emailAddress;
 };
 
+
+export const getStatusCode = (err:any) => err.statusCode || HTTP_STATUS.BAD_REQUEST

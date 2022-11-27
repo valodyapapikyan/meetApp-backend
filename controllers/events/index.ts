@@ -1,37 +1,46 @@
 import { Response, Request, NextFunction } from 'express';
-import { HTTP_STATUS, SuccessHttpResponse } from '../../utils/http-response';
 import { dataBase } from '../../models/index';
-import { ErrorHttpResponse } from '../../utils/http-response/index';
+import {
+  ErrorHttpResponse,
+  SuccessHttpResponse,
+} from '../../helpers/http-response';
+import { HTTP_STATUS } from '../../enums';
+import { CreateHttpError } from '../../helpers/http-response/index';
+import { getStatusCode } from '../../helpers/utils';
+import { LoginTicket } from 'google-auth-library';
 
 class EventController {
-  async getEvents(req: Request, res: Response, next: NextFunction) {
+  async getEvents(request: Request, response: Response, next: NextFunction) {
     try {
       const { count, rows } = await dataBase.Events.findAndCountAll({
-        attributes: [ 
+        attributes: [
           'name',
           'dateTime',
           'description',
           'location',
           'gudelinnes',
-          'eventID'
-         ]
-
+          'eventID',
+        ],
       });
 
-      if (count) {
-        return res
-          .status(HTTP_STATUS.SUCCESS)
-          .json(new SuccessHttpResponse({ count, events: rows }));
+      if (!count) {
+        response.json(
+          new ErrorHttpResponse(response.status, ['there_is_no_events'])
+        );
       }
-      res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json(new ErrorHttpResponse(['there_is_no_events']));
+
+      response.json(
+        new SuccessHttpResponse({
+          count,
+          events: rows,
+        })
+      );
     } catch (error: any) {
-      res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
+      response.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
     }
   }
 
-  async createEvent(req: Request, res: Response, next: NextFunction) {
+  async createEvent(request: Request, response: Response, next: NextFunction) {
     try {
       const {
         name,
@@ -41,20 +50,17 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
-      } = req.body;
+      } = request.body;
 
       const event = await dataBase.Events.findOne({
         where: { name: name.trim().toLowerCase() },
         raw: true,
       });
 
-      //@ts-ignore
-      console.log(req.user);
-
       if (event) {
-        return res
-          .status(HTTP_STATUS.BAD_REQUEST)
-          .json(new ErrorHttpResponse(['event_name_unique']));
+        new CreateHttpError(HTTP_STATUS.BAD_REQUEST, [
+          'event_name_shoukd_beUnique',
+        ]);
       }
 
       await dataBase.Events.create({
@@ -65,20 +71,22 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
-        creatorID: (<any>req).user.userID,
+        creatorID: (<any>request).user.userID,
       });
 
-      res
-        .status(HTTP_STATUS.CREATED)
-        .json(new SuccessHttpResponse({ message: 'event_successfully_created' }));
+      response.status(HTTP_STATUS.CREATED).json(
+        new SuccessHttpResponse({
+          message: 'event_successfully_created',
+        })
+      );
     } catch (error: any) {
-      res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
+      response.status(getStatusCode(error)).json(error);
     }
   }
 
-  async deleteEvenet(req: Request, res: Response, next: NextFunction) {
+  async deleteEvenet(request: Request, response: Response, next: NextFunction) {
     try {
-      const { eventID } = req.params;
+      const { eventID } = request.params;
 
       const event = await dataBase.Events.findOne({
         where: { eventID },
@@ -86,25 +94,24 @@ class EventController {
       });
 
       if (!event) {
-        return res
-          .status(HTTP_STATUS.NOT_FOUND)
-          .json(
-            new SuccessHttpResponse({ data: null, message: 'event_not_found' })
-          );
+        new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
       await dataBase.Events.destroy({ where: { eventID } });
-      res
-        .status(HTTP_STATUS.SUCCESS)
-        .json(new SuccessHttpResponse({ message: 'event_deleted' }));
+
+      response.status(HTTP_STATUS.SUCCESS).json(
+        new SuccessHttpResponse({
+          message: 'event_successfully_deleted',
+        })
+      );
     } catch (error: any) {
-      res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
+      response.status(getStatusCode(error)).json(error);
     }
   }
 
-  async updateEvent(req: Request, res: Response, next: NextFunction) {
+  async updateEvent(request: Request, response: Response, next: NextFunction) {
     try {
-      const { eventID } = req.params;
+      const { eventID } = request.params;
       const {
         name,
         dateTime,
@@ -113,7 +120,7 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
-      } = req.body;
+      } = request.body;
 
       //todo validate every item
 
@@ -123,11 +130,7 @@ class EventController {
       });
 
       if (!event) {
-        return res
-          .status(HTTP_STATUS.NOT_FOUND)
-          .json(
-            new SuccessHttpResponse({ data: null, message: 'event_not_found' })
-          );
+        new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
       await await dataBase.Events.update(
@@ -143,13 +146,13 @@ class EventController {
         { where: { eventID } }
       );
 
-      res
-        .status(HTTP_STATUS.SUCCESS)
-        .json(
-          new SuccessHttpResponse({ message: 'model_successfuly_updated' })
-        );
+      response.status(HTTP_STATUS.SUCCESS).json(
+        new SuccessHttpResponse({
+          message: 'event_successfully_updated',
+        })
+      );
     } catch (error: any) {
-      res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
+      response.status(getStatusCode(error)).json(error);
     }
   }
 }

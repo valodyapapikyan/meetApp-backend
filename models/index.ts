@@ -1,5 +1,5 @@
-import { User } from './auth';
-import { Events } from './events';
+import { User } from './user-model';
+import { Events } from './events-model';
 
 export const dataBase = {
   User,

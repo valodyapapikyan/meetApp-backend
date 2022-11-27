@@ -10,7 +10,7 @@ import { RouteConfig } from './routes/helpers/RouteConfig';
 import { Oauth2Routes } from './routes/oaut2';
 import { EventsRoute } from './routes/events';
 
-import { routeMapper } from './utils';
+import { routeMapper } from './helpers/utils';
 
 const cors = require('cors');
 

@@ -11,7 +11,7 @@ import {
   getLinkedinAuthorizeUrl,
   setEmailOptions,
   setLinkedinAuthorizationHeaders,
-} from '../../utils';
+} from '../../helpers/utils';
 
 import { JwtSerice } from '../jwt-service';
 import { COAST_FACTOR } from '../../configs';

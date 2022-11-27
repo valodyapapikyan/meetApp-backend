@@ -1,19 +1,20 @@
 import { Response, Request, NextFunction } from 'express';
-import { Oaut2Service } from '../../services/oauth2/index';
-import {
-  ErrorHttpResponse,
-  HTTP_STATUS,
-  SuccessHttpResponse,
-} from '../../utils/http-response';
 import { Op } from 'sequelize';
+import {
+  CreateHttpError,
+  ErrorHttpResponse,
+  SuccessHttpResponse,
+} from '../../helpers/http-response';
+
+import { Oaut2Service } from '../../services/oauth2/index';
 
 import { dataBase } from '../../models/index';
 import { IProfile } from '../../interfaces';
-import { getEmail } from '../../utils';
+import { getEmail, getStatusCode } from '../../helpers/utils';
 import { providers } from '../../configs';
+import { HTTP_STATUS } from '../../enums';
 
-class Oauth2Controller {
-
+class UserAuthorizationController {
   async getLinkedinAuthorizeUrl(
     req: Request,
     res: Response,
@@ -21,17 +22,19 @@ class Oauth2Controller {
   ) {
     try {
       const { redirectUrl } = req.query;
-      const URL = Oaut2Service.getLinkedinAuthorizeUrl(redirectUrl);
+      const url = Oaut2Service.getLinkedinAuthorizeUrl(redirectUrl);
 
-      if (URL) {
-        res.status(HTTP_STATUS.CREATED).json(
-          new SuccessHttpResponse({
-            URL,
-          })
-        );
+      if (!url) {
+        new CreateHttpError(HTTP_STATUS.BAD_REQUEST, ['please_try_again']);
       }
+
+      res.status(HTTP_STATUS.CREATED).json(
+        new SuccessHttpResponse({
+          url,
+        })
+      );
     } catch (error: any) {
-      res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
+      res.status(getStatusCode(error)).json(error);
     }
   }
 
@@ -75,9 +78,7 @@ class Oauth2Controller {
         raw: true,
       });
 
-
-      let accessToken;
-
+      let accessToken: unknown;
 
       if (user) {
         accessToken = await Oaut2Service.signInUserWithSocial(user, {
@@ -86,7 +87,11 @@ class Oauth2Controller {
       }
 
       if (!user) {
-        accessToken = await Oaut2Service.signUpUserWithSocial(profile, social, providers.LINKEDIN);
+        accessToken = await Oaut2Service.signUpUserWithSocial(
+          profile,
+          social,
+          providers.LINKEDIN
+        );
       }
 
       response.status(HTTP_STATUS.CREATED).json(
@@ -94,13 +99,14 @@ class Oauth2Controller {
           accessToken,
         })
       );
-    } catch (err) {
-      response.status(HTTP_STATUS.BAD_REQUEST).json({
-        statusCode: HTTP_STATUS.BAD_REQUEST,
-        ...new ErrorHttpResponse([`bad_requset_linkedin_autorize`]),
-      });
+    } catch (err: any) {
+      response
+        .status(getStatusCode(err))
+        .json(
+          new ErrorHttpResponse(getStatusCode(err), ['something_wen_wrong'])
+        );
     }
   }
 }
 
-export default new Oauth2Controller();
+export default new UserAuthorizationController();

@@ -1,7 +1,6 @@
 import * as express from 'express';
 import { SOCIAL_PROVIDERS_CREDENTIALS } from '../configs';
 
-
 export const routeMapper = <T extends abstract new (...args: any) => any>(
   routes: ConstructorParameters<T>[],
   appInstance: express.Application
@@ -10,7 +9,6 @@ export const routeMapper = <T extends abstract new (...args: any) => any>(
     return new route(appInstance);
   });
 };
-
 
 export const setLinkedinAuthorizationHeaders = (accessToken: string) => {
   return {
@@ -51,14 +49,13 @@ export const getAccessTokenConfigs = (code: string, redirectUrl: string) => ({
   },
 });
 
-
-export const parse = (data:any) =>  JSON.parse(data);
+export const parse = (data: any) => JSON.parse(data);
 
 export const getLinkedinAuthorizeUrl = (redirectUrl: string) => {
   return `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${SOCIAL_PROVIDERS_CREDENTIALS.linkedin.clientId}&redirect_uri=${redirectUrl}&scope=r_liteprofile%20r_emailaddress%20`;
+};
 
-}
+export const getEmail = (target: object) => {
+  return target['elements'][0]['handle~'].emailAddress;
+};
 
-export const getEmail  = (target: object) => {
-  return target['elements'][0]['handle~'].emailAddress
-}

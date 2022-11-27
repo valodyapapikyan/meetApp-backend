@@ -17,6 +17,7 @@ export const protect = asyncHandler(async (req: any, res: any, next: any) => {
     token = req.headers.token;
   }
 
+  
   if (!token) {
     return next(
       res.status(HTTP_STATUS.ANAUTHORIZED).json({

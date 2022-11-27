@@ -12,7 +12,7 @@ type UserStatic = typeof Model & {
 export const User = <UserStatic>sequelize.define('users', {
   linkedinId: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   email: {
     type: DataTypes.STRING,
@@ -34,13 +34,18 @@ export const User = <UserStatic>sequelize.define('users', {
       this.setDataValue('firstName', val ? val.trim().toUpperCase() : null);
     },
   },
-  password: {
+  profilePicture: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  profilePicture: {
-    type: DataTypes.STRING,
-    allowNull: true
-  }
+  userID: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV1,
+    allowNull: true,
+  },
+  provider: {
+    type: DataTypes.STRING, //should be  DataTypes.ENUM('linkedin', 'google', 'github')
+    allowNull: true,
+    defaultValue: null
+  },
 });
-

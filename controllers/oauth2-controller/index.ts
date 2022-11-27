@@ -10,6 +10,7 @@ import { Op } from 'sequelize';
 import { dataBase } from '../../models/index';
 import { IProfile } from '../../interfaces';
 import { getEmail } from '../../utils';
+import { providers } from '../../configs';
 
 class Oauth2Controller {
 
@@ -85,7 +86,7 @@ class Oauth2Controller {
       }
 
       if (!user) {
-        accessToken = await Oaut2Service.signUpUserWithSocial(profile, social);
+        accessToken = await Oaut2Service.signUpUserWithSocial(profile, social, providers.LINKEDIN);
       }
 
       response.status(HTTP_STATUS.CREATED).json(

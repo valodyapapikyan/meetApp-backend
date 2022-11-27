@@ -6,7 +6,17 @@ import { ErrorHttpResponse } from '../../utils/http-response/index';
 class EventController {
   async getEvents(req: Request, res: Response, next: NextFunction) {
     try {
-      const { count, rows } = await dataBase.Events.findAndCountAll({});
+      const { count, rows } = await dataBase.Events.findAndCountAll({
+        attributes: [ 
+          'name',
+          'dateTime',
+          'description',
+          'location',
+          'gudelinnes',
+          'eventID'
+         ]
+
+      });
 
       if (count) {
         return res
@@ -38,13 +48,16 @@ class EventController {
         raw: true,
       });
 
+      //@ts-ignore
+      console.log(req.user);
+
       if (event) {
         return res
           .status(HTTP_STATUS.BAD_REQUEST)
           .json(new ErrorHttpResponse(['event_name_unique']));
       }
 
-      const { dataValues: newEvent } = await dataBase.Events.create({
+      await dataBase.Events.create({
         name,
         dateTime,
         description,
@@ -52,13 +65,12 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
+        creatorID: (<any>req).user.userID,
       });
-
-      console.log(newEvent);
 
       res
         .status(HTTP_STATUS.CREATED)
-        .json(new SuccessHttpResponse({ ...newEvent }));
+        .json(new SuccessHttpResponse({ message: 'event_successfully_created' }));
     } catch (error: any) {
       res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
     }
@@ -110,12 +122,12 @@ class EventController {
         raw: true,
       });
 
-      if(!event) {
+      if (!event) {
         return res
-        .status(HTTP_STATUS.NOT_FOUND)
-        .json(
-          new SuccessHttpResponse({ data: null, message: 'event_not_found' })
-        );
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json(
+            new SuccessHttpResponse({ data: null, message: 'event_not_found' })
+          );
       }
 
       await await dataBase.Events.update(
@@ -133,7 +145,9 @@ class EventController {
 
       res
         .status(HTTP_STATUS.SUCCESS)
-        .json(new SuccessHttpResponse({message: 'model_successfuly_updated'}));
+        .json(
+          new SuccessHttpResponse({ message: 'model_successfuly_updated' })
+        );
     } catch (error: any) {
       res.status(error.statusCode || HTTP_STATUS.BAD_REQUEST);
     }

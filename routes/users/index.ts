@@ -1,5 +1,5 @@
 import { Application } from 'express';
-import { RouteConfig } from '../helpers/RouteConfig';
+import { RouteConfig } from '../../helpers/RouteConfig';
 import userAuthorizationController from '../../controllers/user-authorization';
 export class Oauth2Routes extends RouteConfig {
   constructor(app: Application) {

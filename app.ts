@@ -6,8 +6,8 @@ import dbInit from './database/init';
 
 import 'dotenv/config';
 
-import { RouteConfig } from './routes/helpers/RouteConfig';
-import { Oauth2Routes } from './routes/oaut2';
+import { RouteConfig } from './helpers/RouteConfig';
+import { Oauth2Routes } from './routes/users';
 import { EventsRoute } from './routes/events';
 
 import { routeMapper } from './helpers/utils';

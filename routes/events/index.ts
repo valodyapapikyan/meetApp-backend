@@ -1,5 +1,5 @@
 import { Application } from 'express';
-import { RouteConfig } from '../helpers/RouteConfig';
+import { RouteConfig } from '../../helpers/RouteConfig';
 import eventController from '../../controllers/events';
 import { protect } from '../../middlewares/auth';
 

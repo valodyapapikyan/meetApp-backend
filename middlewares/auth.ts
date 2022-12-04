@@ -22,7 +22,7 @@ export const protect = asyncHandler(
     response: CustomResponse,
     next: NextFunction
   ) => {
-    let token: string = getAuthorizationToken(request);
+    const token: string = getAuthorizationToken(request);
 
     if (!token) {
       new CreateHttpError(HTTP_STATUS.ANAUTHORIZED, ['anuthorized']);
@@ -32,13 +32,15 @@ export const protect = asyncHandler(
       const decoded: any = jwt.verify(token, process.env.SECRET_KEY);
 
       const user: any = await User.findOne({
-        where: { userID: decoded.id },
+        where: { userID: decoded.userID },
       });
 
       request.user = user.dataValues;
       next();
     } catch (error: any) {
-      response.status(getStatusCode(error)).json(error);
+      response
+        .status(getStatusCode(error))
+        .json({ message: 'authorisation_middlevare_catch' });
     }
   }
 );

@@ -14,7 +14,13 @@ export const sequelizeConnection: Sequelize = new Sequelize(
   }
 );
 
+// use migration when
+
+// force: true // developmenti hamar force dnuymem true u run em talis ,  run ic haneluc heto anumem
+
+
 (async () => {
+
   try {
     await sequelizeConnection.authenticate();
     console.log('Connection has been established successfully.');

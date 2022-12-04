@@ -9,7 +9,12 @@ type EvantStatic = typeof Model & {
   new (values?: object, options?: BuildOptions): EventsModel;
 };
 
-export const Events = <EvantStatic>sequelize.define('events', {
+export const Event = <EvantStatic>sequelize.define('events', {
+  eventID: {
+    type: DataTypes.UUID, //todo use uuidv4
+    defaultValue: DataTypes.UUIDV1,
+    primaryKey: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -41,14 +46,9 @@ export const Events = <EvantStatic>sequelize.define('events', {
     defaultValue: false,
     allowNull: true
   },
-  eventID: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV1,
-    allowNull: true
-  },
   creatorID : {
     type: DataTypes.UUID,
     allowNull: false,
     primaryKey: true
   }
-});
+},{timestamps: false});

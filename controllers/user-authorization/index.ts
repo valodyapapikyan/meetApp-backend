@@ -64,6 +64,7 @@ class UserAuthorizationController {
 
       social.linkedinId = profile.id;
 
+      socialUser.userName = getEmail(profile);
       socialUser.email = getEmail(profile);
       socialUser.firstName = profile.firstName;
       socialUser.lastName = profile.lastName;
@@ -82,7 +83,7 @@ class UserAuthorizationController {
 
       if (user) {
         accessToken = await Oaut2Service.signInUserWithSocial(user, {
-          linkedinId: social.linkedinId,
+          linkedinId: social.linkedinId, // USE DATE, NAME, AND MORE ADDITIONAL FIELDS
         });
       }
 

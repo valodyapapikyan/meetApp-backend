@@ -7,12 +7,16 @@ import {
 import { HTTP_STATUS } from '../../enums';
 import { CreateHttpError } from '../../helpers/http-response/index';
 import { getStatusCode } from '../../helpers/utils';
-import { LoginTicket } from 'google-auth-library';
+import { Op } from 'sequelize';
+import { UserModel } from '../../models/user-model';
 
+interface CustomRequest extends Request {
+  user?: any;
+}
 class EventController {
   async getEvents(request: Request, response: Response, next: NextFunction) {
     try {
-      const { count, rows } = await dataBase.Events.findAndCountAll({
+      const { count, rows } = await dataBase.Event.findAndCountAll({
         attributes: [
           'name',
           'dateTime',
@@ -22,12 +26,6 @@ class EventController {
           'eventID',
         ],
       });
-
-      if (!count) {
-        response.json(
-          new ErrorHttpResponse(response.status, ['there_is_no_events'])
-        );
-      }
 
       response.json(
         new SuccessHttpResponse({
@@ -52,18 +50,18 @@ class EventController {
         eventType,
       } = request.body;
 
-      const event = await dataBase.Events.findOne({
+      const event = await dataBase.Event.findOne({
         where: { name: name.trim().toLowerCase() },
         raw: true,
       });
 
       if (event) {
         new CreateHttpError(HTTP_STATUS.BAD_REQUEST, [
-          'event_name_shoukd_beUnique',
+          'event_name_should_beUnique',
         ]);
       }
 
-      await dataBase.Events.create({
+      await dataBase.Event.create({
         name,
         dateTime,
         description,
@@ -88,7 +86,7 @@ class EventController {
     try {
       const { eventID } = request.params;
 
-      const event = await dataBase.Events.findOne({
+      const event = await dataBase.Event.findOne({
         where: { eventID },
         raw: true,
       });
@@ -97,7 +95,7 @@ class EventController {
         new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
-      await dataBase.Events.destroy({ where: { eventID } });
+      await dataBase.Event.destroy({ where: { eventID } });
 
       response.status(HTTP_STATUS.SUCCESS).json(
         new SuccessHttpResponse({
@@ -124,7 +122,7 @@ class EventController {
 
       //todo validate every item
 
-      const event = await dataBase.Events.findOne({
+      const event = await dataBase.Event.findOne({
         where: { eventID },
         raw: true,
       });
@@ -133,7 +131,7 @@ class EventController {
         new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
-      await await dataBase.Events.update(
+      await await dataBase.Event.update(
         {
           name,
           dateTime,
@@ -152,6 +150,60 @@ class EventController {
         })
       );
     } catch (error: any) {
+      response.status(getStatusCode(error)).json(error);
+    }
+  }
+
+  async attendeEvent(
+    request: Request & CustomRequest,
+    response: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { email, company, direction, experience, acceptenceOfTermsConds } =
+        request.body;
+
+      const { user } = request;
+      const { eventID } = request.params;
+
+      const loggedInUser: UserModel = await dataBase.User.findOne({
+        where: {
+          [Op.or]: [{ userName: user.userName }],
+        },
+        raw: true,
+      });
+
+      if (loggedInUser.linkedinId) {
+        await dataBase.User.update(
+          {
+            email: email,
+            company,
+            direction,
+            experience,
+            acceptenceOfTermsConds,
+            ...loggedInUser,
+          },
+          {
+            where: { userName: user.userName },
+          }
+        );
+
+        const userevents = await dataBase.UserEvents.create({
+          userID: user.userID,
+          eventID: eventID,
+        });
+
+        const userEvents = userevents.get({ plain: true });
+
+        if (userEvents) {
+          response
+            .status(HTTP_STATUS.CREATED)
+            .json(new SuccessHttpResponse(null));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+
       response.status(getStatusCode(error)).json(error);
     }
   }

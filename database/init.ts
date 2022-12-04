@@ -12,7 +12,8 @@ const isTestEnv = process.env.NODE_ENV !==  enviroments.TEST;
 
 const dbInit = () => Promise.all([
   dataBase.User.sync({ alter: isDevelopmentEnv || isTestEnv }),
-  dataBase.Events.sync({ alter: isDevelopmentEnv || isTestEnv }),
+  dataBase.Event.sync({ alter: isDevelopmentEnv || isTestEnv }), //modelnery u dbn sync a
+  dataBase.UserEvents.sync({ alter: isDevelopmentEnv || isTestEnv }),
 ])
 
 export default dbInit;

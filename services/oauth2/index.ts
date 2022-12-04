@@ -14,9 +14,7 @@ import {
 } from '../../helpers/utils';
 
 import { JwtSerice } from '../jwt-service';
-import { COAST_FACTOR } from '../../configs';
-
-const certPath = path.join(`${__dirname}/../../certs/user-token/private.pem`);
+import { LoginTicket } from 'google-auth-library';
 export class Oaut2Service {
   static getLinkedinAuthorizeUrl(redirectUrl) {
     return getLinkedinAuthorizeUrl(redirectUrl);
@@ -69,21 +67,24 @@ export class Oaut2Service {
   }
 
   static async signInUserWithSocial(user, social) {
-
     await dataBase.User.update(social, {
       where: { linkedinId: user.linkedinId },
     });
 
     return Promise.resolve(
-      await JwtSerice.signToken({ id: user.userID }, process.env.SECRET_KEY, '24')
+      await JwtSerice.signToken(
+        { userID: user.userID, linkedinID: user.linkedinId },
+        process.env.SECRET_KEY,
+        '24h'
+      )
     );
   }
 
   static async signUpUserWithSocial(profile, social, provider?) {
-
     const { localizedFirstName, localizedLastName, profilePicture } = profile;
 
     const userData = await dataBase.User.create({
+      userName: getEmail(profile),
       email: getEmail(profile),
       firstName: localizedFirstName,
       lastName: localizedLastName,
@@ -94,11 +95,14 @@ export class Oaut2Service {
       createdAt: moment.utc().valueOf(),
     });
 
-
     const user = userData.get({ plain: true });
 
     return Promise.resolve(
-      await JwtSerice.signToken({ userID: user.userID }, process.env.SECRET_KEY, '24')
+      await JwtSerice.signToken(
+        { userID: user.userID, linkedinID: user.linkedinId },
+        process.env.SECRET_KEY,
+        '24h'
+      )
     );
   }
 }

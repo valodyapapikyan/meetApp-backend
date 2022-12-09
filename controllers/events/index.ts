@@ -48,6 +48,7 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
+        speaker // {}
       } = request.body;
 
       const event = await dataBase.Event.findOne({
@@ -61,6 +62,8 @@ class EventController {
         ]);
       }
 
+      const {fullName: speakerFullName, talk, company:speakerComany} = speaker;
+
       await dataBase.Event.create({
         name,
         dateTime,
@@ -69,6 +72,9 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
+        speakerFullName,
+        talk,
+        speakerComany,
         creatorID: (<any>request).user.userID,
       });
 
@@ -78,6 +84,8 @@ class EventController {
         })
       );
     } catch (error: any) {
+      console.log(error);
+      
       response.status(getStatusCode(error)).json(error);
     }
   }
@@ -202,8 +210,6 @@ class EventController {
         }
       }
     } catch (error) {
-      console.log(error);
-
       response.status(getStatusCode(error)).json(error);
     }
   }

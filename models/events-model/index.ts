@@ -49,6 +49,19 @@ export const Event = <EvantStatic>sequelize.define('events', {
   creatorID : {
     type: DataTypes.UUID,
     allowNull: false,
-    primaryKey: true
-  }
+  },
+  speakerFullName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  talk: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  speakerComany: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+
 },{timestamps: false});

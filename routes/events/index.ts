@@ -1,8 +1,10 @@
 import { Application } from 'express';
 import { RouteConfig } from '../../helpers/RouteConfig';
 import eventController from '../../controllers/events';
-import userEventsController from '../../controllers/user-events'
+import userEventsController from '../../controllers/user-events';
 import { protect } from '../../middlewares/auth';
+import { ModelValidator } from '../../middlewares/validator';
+import { eventValidationScheme } from '../../validation-schemas';
 
 export class EventsRoute extends RouteConfig {
   constructor(app: Application) {
@@ -11,11 +13,23 @@ export class EventsRoute extends RouteConfig {
 
   configureRoutes(): Application {
     this.app.route('/events').get([eventController.getEvents]);
-    this.app.route('/events/create').post(protect,[eventController.createEvent]);
-    this.app.route('/events/:eventID').delete(protect,[eventController.deleteEvenet]);
-    this.app.route('/events/:eventID').put(protect,[eventController.updateEvent]);
-    this.app.route('/events/attende/:eventID').post(protect,[eventController.attendeEvent])
-    this.app.route('/events/user-events').get(protect,[userEventsController.getUserEvents])
+    this.app
+      .route('/events/create')
+      .post(protect, ModelValidator.validate(eventValidationScheme), [
+        eventController.createEvent,
+      ]);
+    this.app
+      .route('/events/:eventID')
+      .delete(protect, [eventController.deleteEvenet]);
+    this.app
+      .route('/events/:eventID')
+      .put(protect, [eventController.updateEvent]);
+    this.app
+      .route('/events/attende/:eventID')
+      .post(protect, [eventController.attendeEvent]);
+    this.app
+      .route('/events/user-events')
+      .get(protect, [userEventsController.getUserEvents]);
 
     return this.app;
   }

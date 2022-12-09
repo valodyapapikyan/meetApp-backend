@@ -24,7 +24,8 @@
     "sequelize-typescript": "^2.1.5",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.6.0",
-    "uuidv1": "^1.6.14"
+    "uuidv1": "^1.6.14",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "ts-node index.ts",

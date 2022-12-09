@@ -16,3 +16,11 @@ export enum RESPONSE_STATUS {
   SUCCESS = 'success',
   ERROR = 'error',
 }
+
+export enum REQUEST_TYPES {
+  POST = 'POST',
+  DELETE = 'DELETE',
+  PUT = 'PUT',
+  GET = 'GET',
+  PATCH = 'PATCH'
+}

@@ -61,4 +61,6 @@ export const getEmail = (target: object) => {
 };
 
 
-export const getStatusCode = (err:any) => err.statusCode || HTTP_STATUS.BAD_REQUEST
+export const getStatusCode = (err:any) => err.statusCode || HTTP_STATUS.BAD_REQUEST;
+
+export const isEmptyObject = (target) => Object.keys(target)

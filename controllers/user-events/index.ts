@@ -4,7 +4,7 @@ import {
   CreateHttpError,
   SuccessHttpResponse,
 } from '../../helpers/http-response';
-import { UserEvents } from '../../models/user-events/index';
+import { UserEvents } from '../../models/user-events-model';
 import { dataBase } from '../../models/index';
 import { getStatusCode } from '../../helpers/utils';
 import { UserModel } from '../../models/user-model';

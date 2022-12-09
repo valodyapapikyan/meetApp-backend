@@ -5,7 +5,7 @@ export class HttpResponse<T> {
     public statusCode: HTTP_STATUS,
     public status: RESPONSE_STATUS,
     public data: T,
-    public errorMessages: Array<string> | null,
+    public errorMessages: Array<any> | {[key: string] : any},
     public additionalInfo?: any
   ) {}
 }
@@ -19,7 +19,7 @@ export class SuccessHttpResponse<T> extends HttpResponse<T> {
 export class ErrorHttpResponse extends HttpResponse<null> {
   constructor(
     statusCode,
-    errorMessages: Array<string>,
+    errorMessages: Array<any> | {[key: string] : any},
     additionalInfo: any = null
   ) {
     super(
@@ -33,11 +33,11 @@ export class ErrorHttpResponse extends HttpResponse<null> {
 }
 
 export class CreateHttpError {
-  constructor(status, message: Array<string>, additionalInfo?) {
+  constructor(status, message: Array<any> | {[key: string] : any}, additionalInfo?) {
     this.throw(status, message, additionalInfo);
   }
 
-  private throw(status, message: Array<string>, additionalInfo?) {
+  private throw(status, message:Array<any> | {[key: string] : any}, additionalInfo?) {
     throw new ErrorHttpResponse(status, message, additionalInfo);
   }
 }

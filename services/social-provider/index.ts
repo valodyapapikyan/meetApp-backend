@@ -14,8 +14,10 @@ import {
 } from '../../helpers/utils';
 
 import { JwtSerice } from '../jwt-service';
-import { LoginTicket } from 'google-auth-library';
-export class Oaut2Service {
+
+
+
+export class SocialProviderService {
   static getLinkedinAuthorizeUrl(redirectUrl) {
     return getLinkedinAuthorizeUrl(redirectUrl);
   }
@@ -101,7 +103,7 @@ export class Oaut2Service {
       await JwtSerice.signToken(
         { userID: user.userID, linkedinID: user.linkedinId },
         process.env.SECRET_KEY,
-        '24h'
+        '1m'
       )
     );
   }

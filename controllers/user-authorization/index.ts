@@ -6,7 +6,7 @@ import {
   SuccessHttpResponse,
 } from '../../helpers/http-response';
 
-import { Oaut2Service } from '../../services/oauth2/index';
+import { SocialProviderService } from '../../services/social-provider/index';
 
 import { dataBase } from '../../models/index';
 import { IProfile } from '../../interfaces';
@@ -22,7 +22,7 @@ class UserAuthorizationController {
   ) {
     try {
       const { redirectUrl } = req.query;
-      const url = Oaut2Service.getLinkedinAuthorizeUrl(redirectUrl);
+      const url = SocialProviderService.getLinkedinAuthorizeUrl(redirectUrl);
 
       if (!url) {
         new CreateHttpError(HTTP_STATUS.BAD_REQUEST, ['please_try_again']);
@@ -48,12 +48,12 @@ class UserAuthorizationController {
       const social: Partial<IProfile> = {};
       const socialUser: IProfile = {} as IProfile;
 
-      const result = await Oaut2Service.authorizeLinkedinService(
+      const result = await SocialProviderService.authorizeLinkedinService(
         code,
         redirectUrl
       );
 
-      const data: any = await Oaut2Service.getLinkedinProfile(
+      const data: any = await SocialProviderService.getLinkedinProfile(
         result.access_token
       );
 
@@ -82,13 +82,13 @@ class UserAuthorizationController {
       let accessToken: unknown;
 
       if (user) {
-        accessToken = await Oaut2Service.signInUserWithSocial(user, {
+        accessToken = await SocialProviderService.signInUserWithSocial(user, {
           linkedinId: social.linkedinId, // USE DATE, NAME, AND MORE ADDITIONAL FIELDS
         });
       }
 
       if (!user) {
-        accessToken = await Oaut2Service.signUpUserWithSocial(
+        accessToken = await SocialProviderService.signUpUserWithSocial(
           profile,
           social,
           providers.LINKEDIN

@@ -1,9 +1,6 @@
 import { Response, Request, NextFunction } from 'express';
 import { dataBase } from '../../models/index';
-import {
-  ErrorHttpResponse,
-  SuccessHttpResponse,
-} from '../../helpers/http-response';
+import { SuccessHttpResponse } from '../../helpers/http-response';
 import { HTTP_STATUS } from '../../enums';
 import { CreateHttpError } from '../../helpers/http-response/index';
 import { getStatusCode } from '../../helpers/utils';
@@ -48,7 +45,7 @@ class EventController {
         gudelinnes,
         endDate,
         eventType,
-        speaker // {}
+        speaker, // {}
       } = request.body;
 
       const event = await dataBase.Event.findOne({
@@ -62,7 +59,11 @@ class EventController {
         ]);
       }
 
-      const {fullName: speakerFullName, talk, company:speakerComany} = speaker;
+      const {
+        fullName: speakerFullName,
+        talk,
+        company: speakerComany,
+      } = speaker;
 
       await dataBase.Event.create({
         name,
@@ -84,8 +85,6 @@ class EventController {
         })
       );
     } catch (error: any) {
-      console.log(error);
-      
       response.status(getStatusCode(error)).json(error);
     }
   }
@@ -168,6 +167,7 @@ class EventController {
     next: NextFunction
   ) {
     try {
+
       const { email, company, direction, experience, acceptenceOfTermsConds } =
         request.body;
 

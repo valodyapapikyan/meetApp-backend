@@ -1,5 +1,5 @@
 export const getAuthorizationToken = (request: Request) => {
-  let token = '';
+  let token = null;
   const hasBearerToken =
     request.headers['authorization'] &&
     request.headers['authorization'].startsWith('Bearer');
@@ -10,6 +10,7 @@ export const getAuthorizationToken = (request: Request) => {
   if (request.headers['token']) {
     token = request.headers['authorization'].split(' ')[1];
   }
+
 
   return token;
 };

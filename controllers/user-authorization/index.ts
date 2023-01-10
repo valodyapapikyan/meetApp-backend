@@ -108,6 +108,27 @@ class UserAuthorizationController {
         );
     }
   }
+
+  async getUserProfile(request: any, response: Response, next: NextFunction) {
+    try {
+      const { email, lastName, firstName } = request.user;
+      response.status(HTTP_STATUS.SUCCESS).json(
+        new SuccessHttpResponse({
+          profile: {
+            email,
+            lastName,
+            firstName,
+          },
+        })
+      );
+    } catch (err: any) {
+      response
+        .status(getStatusCode(err))
+        .json(
+          new ErrorHttpResponse(getStatusCode(err), ['something_wen_wrong'])
+        );
+    }
+  }
 }
 
 export default new UserAuthorizationController();

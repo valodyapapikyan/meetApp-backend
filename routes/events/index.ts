@@ -17,6 +17,9 @@ export class EventsRoute extends RouteConfig {
       .route(endpoints.event.paths.getEvents)
       .get([eventController.getEvents]);
     this.app
+        .route(endpoints.event.paths.getEvent)
+        .get([eventController.getEvent]);
+    this.app
       .route(endpoints.event.paths.create)
       .post(protect, ModelValidator.validate(eventValidationScheme), [
         eventController.createEvent,

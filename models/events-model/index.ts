@@ -19,15 +19,13 @@ export const Event = <EvantStatic>sequelize.define('events', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  dateTime: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: false,
+  date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
   },
-  endDate : {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: false
+  time : {
+    type: DataTypes.TIME,
+    allowNull: true,
   },
   location: {
     type: DataTypes.STRING,
@@ -54,14 +52,25 @@ export const Event = <EvantStatic>sequelize.define('events', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  talk: {
+  topic: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  speakerComany: {
+  speakerCompany: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-
+  timeFrame: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  hasTimeFrame: {
+    type:DataTypes.BOOLEAN,
+    allowNull: false
+  },
+  image: {
+    type:DataTypes.TEXT('long'),
+    allowNull: true
+  }
 
 },{timestamps: false});

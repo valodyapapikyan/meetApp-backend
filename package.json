@@ -21,6 +21,7 @@
     "reflect-metadata": "^0.1.13",
     "request-promise": "^4.2.6",
     "sequelize": "^6.25.5",
+    "sequelize-json-serializer": "^1.1.0",
     "sequelize-typescript": "^2.1.5",
     "swagger-jsdoc": "^6.2.5",
     "swagger-ui-express": "^4.6.0",

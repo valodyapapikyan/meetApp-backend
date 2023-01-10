@@ -1,29 +1,58 @@
-import { Response, Request, NextFunction } from 'express';
-import { dataBase } from '../../models/index';
-import {
-  ErrorHttpResponse,
-  SuccessHttpResponse,
-} from '../../helpers/http-response';
-import { HTTP_STATUS } from '../../enums';
-import { CreateHttpError } from '../../helpers/http-response/index';
-import { getStatusCode } from '../../helpers/utils';
-import { Op } from 'sequelize';
-import { UserModel } from '../../models/user-model';
+import {NextFunction, Request, Response} from 'express';
+import {dataBase} from '../../models/index';
+import {SuccessHttpResponse} from '../../helpers/http-response';
+import {HTTP_STATUS} from '../../enums';
+import {CreateHttpError} from '../../helpers/http-response/index';
+import {getStatusCode} from '../../helpers/utils';
+import {Op} from 'sequelize';
+import {UserModel} from '../../models/user-model';
 
 interface CustomRequest extends Request {
   user?: any;
 }
+
 class EventController {
+
+  async getEvent(request: Request, response: Response, next: NextFunction) {
+    try {
+      const {eventID} = request.params;
+
+      const event = await dataBase.Event.findOne({
+        where: {eventID},
+        raw: true,
+      });
+
+      if (event) {
+        return response
+          .status(HTTP_STATUS.SUCCESS).json(
+            new SuccessHttpResponse({
+              event
+            })
+          );
+      }
+
+
+      new CreateHttpError(HTTP_STATUS.NOT_FOUND, [
+        'EVEN_NOT_FOUND',
+      ]);
+
+
+    } catch (error: any) {
+      response.status(getStatusCode(error)).json(error);
+    }
+  }
+
   async getEvents(request: Request, response: Response, next: NextFunction) {
     try {
-      const { count, rows } = await dataBase.Event.findAndCountAll({
+      const {count, rows} = await dataBase.Event.findAndCountAll({
         attributes: [
           'name',
-          'dateTime',
+          'date',
           'description',
           'location',
           'gudelinnes',
           'eventID',
+          'image'
         ],
       });
 
@@ -42,19 +71,23 @@ class EventController {
     try {
       const {
         name,
-        dateTime,
+        date,
         description,
         location,
         gudelinnes,
-        endDate,
-        eventType,
-        speaker // {}
+        image,
+        time,
+        eventType = 'test', //TODO: Adrinei het xoselu
+        hasTimeFrame,
+        timeFrame,
+        speaker, // {}
       } = request.body;
 
       const event = await dataBase.Event.findOne({
-        where: { name: name.trim().toLowerCase() },
+        where: {name: name.trim().toLowerCase()},
         raw: true,
       });
+
 
       if (event) {
         new CreateHttpError(HTTP_STATUS.BAD_REQUEST, [
@@ -62,19 +95,26 @@ class EventController {
         ]);
       }
 
-      const {fullName: speakerFullName, talk, company:speakerComany} = speaker;
+      const {
+        speakerFullName,
+        topic,
+        speakerCompany,
+      } = speaker;
 
       await dataBase.Event.create({
         name,
-        dateTime,
+        time,
         description,
         location,
         gudelinnes,
-        endDate,
+        date,
         eventType,
         speakerFullName,
-        talk,
-        speakerComany,
+        timeFrame,
+        topic,
+        speakerCompany,
+        hasTimeFrame,
+        image,
         creatorID: (<any>request).user.userID,
       });
 
@@ -84,18 +124,16 @@ class EventController {
         })
       );
     } catch (error: any) {
-      console.log(error);
-      
       response.status(getStatusCode(error)).json(error);
     }
   }
 
   async deleteEvenet(request: Request, response: Response, next: NextFunction) {
     try {
-      const { eventID } = request.params;
+      const {eventID} = request.params;
 
       const event = await dataBase.Event.findOne({
-        where: { eventID },
+        where: {eventID},
         raw: true,
       });
 
@@ -103,7 +141,7 @@ class EventController {
         new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
-      await dataBase.Event.destroy({ where: { eventID } });
+      await dataBase.Event.destroy({where: {eventID}});
 
       response.status(HTTP_STATUS.SUCCESS).json(
         new SuccessHttpResponse({
@@ -117,7 +155,7 @@ class EventController {
 
   async updateEvent(request: Request, response: Response, next: NextFunction) {
     try {
-      const { eventID } = request.params;
+      const {eventID} = request.params;
       const {
         name,
         dateTime,
@@ -131,7 +169,7 @@ class EventController {
       //todo validate every item
 
       const event = await dataBase.Event.findOne({
-        where: { eventID },
+        where: {eventID},
         raw: true,
       });
 
@@ -139,7 +177,7 @@ class EventController {
         new CreateHttpError(HTTP_STATUS.NOT_FOUND, ['event_not_found']);
       }
 
-      await await dataBase.Event.update(
+      await dataBase.Event.update(
         {
           name,
           dateTime,
@@ -149,7 +187,7 @@ class EventController {
           endDate,
           eventType,
         },
-        { where: { eventID } }
+        {where: {eventID}}
       );
 
       response.status(HTTP_STATUS.SUCCESS).json(
@@ -168,15 +206,16 @@ class EventController {
     next: NextFunction
   ) {
     try {
-      const { email, company, direction, experience, acceptenceOfTermsConds } =
+
+      const {email, company, direction, experience, acceptenceOfTermsConds} =
         request.body;
 
-      const { user } = request;
-      const { eventID } = request.params;
+      const {user} = request;
+      const {eventID} = request.params;
 
       const loggedInUser: UserModel = await dataBase.User.findOne({
         where: {
-          [Op.or]: [{ userName: user.userName }],
+          [Op.or]: [{userName: user.userName}],
         },
         raw: true,
       });
@@ -192,7 +231,7 @@ class EventController {
             ...loggedInUser,
           },
           {
-            where: { userName: user.userName },
+            where: {userName: user.userName},
           }
         );
 
@@ -201,7 +240,7 @@ class EventController {
           eventID: eventID,
         });
 
-        const userEvents = userevents.get({ plain: true });
+        const userEvents = userevents.get({plain: true});
 
         if (userEvents) {
           response
